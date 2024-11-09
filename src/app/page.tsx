@@ -1,10 +1,12 @@
-import Link from 'next/link';
+import { AnnotationProvider } from '@/context/AnnotationContext';
 import UploadPage from './upload/page';
 
 const HomePage = () => {
   return (
     <main>
-      <UploadPage/>
+      <AnnotationProvider>
+       <UploadPage/>
+      </AnnotationProvider>
     </main>
   );
 };

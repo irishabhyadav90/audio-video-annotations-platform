@@ -19,16 +19,22 @@ wss.on('connection', (ws) => {
   // Handle incoming messages
   ws.on('message', (message) => {
    const parsedMessage = JSON.parse(message);
-
    if (parsedMessage.type === 'status') {
     // Update user status (e.g., Viewing, Annotating, Idle)
     users[userId].status = parsedMessage.status;
+    broadcastUsers();
   } else if (parsedMessage.type === 'position') {
     // Update user's playback position
     users[userId].currentTime = parsedMessage.currentTime;
-  }
-    // Broadcast updated user list after changes
     broadcastUsers();
+  } else if (parsedMessage.type === 'add') {
+    // Broadcast new annotation to all clients
+    broadcastMessage({ type: 'add', annotation: parsedMessage.annotation });
+
+  } else if (parsedMessage.type === 'delete') {
+    // Broadcast deletion to all clients
+    broadcastMessage({ type: 'delete', timestamp: parsedMessage.timestamp });
+  }
   });
 
   // Handle disconnection
@@ -39,10 +45,23 @@ wss.on('connection', (ws) => {
   });
 });
 
+// Broadcast the list of users to all connected clients
 function broadcastUsers() {
   const userList = Object.values(users);
   const message = JSON.stringify({ type: 'userList', users: userList });
  
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      console.log("sent message:", message);
+      client.send(message);
+    }
+  });
+}
+
+// Broadcast messages (annotations) to all connected clients
+function broadcastMessage(data) {
+  const message = JSON.stringify(data);
+
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(message);
