@@ -130,6 +130,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
                 onPlay={() => handleStatusChange('Viewing')}
                 onPause={() => handleStatusChange('Idle')}
                 className="w-full max-w-lg"
+                data-testid="video-player"
             />
             <div>
                 <h3>Users</h3>
@@ -159,7 +160,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
                     <h3>Annotations</h3>
                     <ul>
                         {annotations.map((annotation, index) => (
-                            <li key={index}>
+                            <li key={index} data-testid="annotation-list">
                                 [{annotation.timestamp?.toFixed(2)}s]: {annotation.text}
                                 {role === 'editor' && (
                                     <button onClick={() => handleDeleteAnnotation(annotation.timestamp)} className="ml-2 text-red-500">
