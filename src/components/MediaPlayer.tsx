@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Annotation } from '@/types/annotations';
+import { useAnnotations } from '@/hooks/useAnnotations';
 
 interface MediaPlayerProps {
     src: string;
@@ -19,11 +20,13 @@ const mockTranscription = [
 const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const [currentTime, setCurrentTime] = useState<number>(0);
-    const [annotations, setAnnotations] = useState<Annotation[]>([]);
+    // const [annotations, setAnnotations] = useState<Annotation[]>([]);
     const [annotationText, setAnnotationText] = useState<string>('');
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [users, setUsers] = useState<{ id: string; status: string; currentTime: number }[]>([]);
     const wsRef = useRef<WebSocket | null>(null);
+
+    const { annotations, addAnnotation, deleteAnnotation } = useAnnotations();
 
     useEffect(() => {
         // Initialize WebSocket connection
@@ -44,10 +47,10 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
             }
             else if (message.type === 'delete') {
                 // Handle deletion by removing the annotation with the specified timestamp
-                setAnnotations((prev) => prev.filter(annotation => annotation.timestamp !== message.timestamp));
+                deleteAnnotation(message.timestamp);
             } else if(message.type === 'add') {
                 // Handle addition of new annotation
-                setAnnotations((prev) => [...prev, message]);
+                addAnnotation(message.annotation);
             }
         };
 
@@ -79,14 +82,14 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
 
         const newAnnotation: Annotation = { timestamp: currentTime, text: annotationText };
         wsRef.current.send(JSON.stringify({ type: 'add', annotation: newAnnotation })); // Send annotation to WebSocket server
-        setAnnotations((prev) => [...prev, newAnnotation]); // Update local state
+        addAnnotation({ timestamp: currentTime, text: annotationText });
         setAnnotationText('');
     };
 
     const handleDeleteAnnotation = (timestamp: number) => {
         if (role !== 'editor') return; // Only editors can delete annotations
 
-        setAnnotations((prev) => prev.filter(annotation => annotation.timestamp !== timestamp));
+        deleteAnnotation(timestamp);
 
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
             wsRef.current.send(JSON.stringify({ type: 'delete', timestamp }));
