@@ -22,6 +22,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
     const [annotations, setAnnotations] = useState<Annotation[]>([]);
     const [annotationText, setAnnotationText] = useState<string>('');
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const [users, setUsers] = useState<{ id: string; status: string; currentTime: number }[]>([]);
     const wsRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
@@ -35,11 +36,16 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
         wsRef.current.onmessage = async (event) => {
             const dataText = await event.data;
             const message = JSON.parse(dataText);
+
             console.log("on client end", message)
-            if (message.type === 'delete') {
+            if (message.type === 'userList') {
+                // Update the list of users and their statuses
+                setUsers(message.users);
+            }
+            else if (message.type === 'delete') {
                 // Handle deletion by removing the annotation with the specified timestamp
                 setAnnotations((prev) => prev.filter(annotation => annotation.timestamp !== message.timestamp));
-            } else {
+            } else if(message.type === 'add') {
                 // Handle addition of new annotation
                 setAnnotations((prev) => [...prev, message]);
             }
@@ -57,7 +63,13 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
 
     const handleTimeUpdate = () => {
         if (videoRef.current) {
-            setCurrentTime(videoRef.current.currentTime);
+            const time = videoRef.current.currentTime;
+            setCurrentTime(time);
+
+            // Send playback position to WebSocket server
+            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+                wsRef.current.send(JSON.stringify({ type: 'position', currentTime: time }));
+            }
         }
     };
 
@@ -66,7 +78,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
         if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
 
         const newAnnotation: Annotation = { timestamp: currentTime, text: annotationText };
-        wsRef.current.send(JSON.stringify(newAnnotation)); // Send annotation to WebSocket server
+        wsRef.current.send(JSON.stringify({ type: 'add', annotation: newAnnotation })); // Send annotation to WebSocket server
         setAnnotations((prev) => [...prev, newAnnotation]); // Update local state
         setAnnotationText('');
     };
@@ -99,7 +111,12 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
         }
     };
 
-
+     const handleStatusChange = (status: string) => {
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({ type: 'status', status }));
+        }
+    };
+    
     return (
         <div>
             <video
@@ -107,8 +124,20 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
                 src={src}
                 controls
                 onTimeUpdate={handleTimeUpdate}
+                onPlay={() => handleStatusChange('Viewing')}
+                onPause={() => handleStatusChange('Idle')}
                 className="w-full max-w-lg"
             />
+            <div>
+                <h3>Users</h3>
+                <ul>
+                    {users.map((user) => (
+                        <li key={user.id}>
+                            {user.id} - {user.status} at {user.currentTime.toFixed(2)}s
+                        </li>
+                    ))}
+                </ul>
+            </div>
             <div>
                 {role === 'editor' && <div>
                     <p>Current Time: {currentTime.toFixed(2)} seconds</p>
@@ -128,7 +157,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
                     <ul>
                         {annotations.map((annotation, index) => (
                             <li key={index}>
-                                [{annotation.timestamp.toFixed(2)}s]: {annotation.text}
+                                [{annotation.timestamp?.toFixed(2)}s]: {annotation.text}
                                 {role === 'editor' && (
                                     <button onClick={() => handleDeleteAnnotation(annotation.timestamp)} className="ml-2 text-red-500">
                                         Delete
