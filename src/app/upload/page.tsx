@@ -1,7 +1,9 @@
 'use client';
-import { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import UploadMedia from '@/components/UploadMedia';
-import MediaPlayer from '@/components/MediaPlayer';
+
+
+const MediaPlayer = lazy(() => import('@/components/MediaPlayer'));
 
 const UploadAndPlayPage = () => {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
@@ -14,7 +16,9 @@ const UploadAndPlayPage = () => {
         {!fileUrl ? (
         <UploadMedia onFileUploaded={setFileUrl} />
       ) : (
-        <MediaPlayer src={fileUrl} role={userRole} />
+        <Suspense fallback={<div>Loading player...</div>}>
+         <MediaPlayer src={fileUrl} role={userRole} />
+        </Suspense>
       )}
       </div>
     </main>
