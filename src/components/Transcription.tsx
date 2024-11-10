@@ -1,4 +1,3 @@
-// Transcription.tsx
 import React from 'react';
 
 interface TranscriptionProps {
@@ -27,25 +26,32 @@ const Transcription: React.FC<TranscriptionProps> = ({
     : transcription;
 
   return (
-    <div className="mt-4">
-      <h3>Transcription</h3>
+    <div className="bg-white rounded-lg p-6 shadow-lg max-w-lg mx-auto mt-4">
+      <h3 className="text-xl font-semibold text-gray-700 mb-4">Transcription</h3>
+      
       <input
         type="text"
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
-        placeholder="Search transcription"
-        className="border p-2 mb-2"
+        placeholder="Search transcription..."
+        className="w-full border border-gray-300 rounded-lg p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-gray-800"
       />
-      <ul>
+
+      <ul className="space-y-2">
         {filteredTranscription.map((line, index) => (
           <li
             key={index}
             onClick={() => onJumpToTimestamp(line.timestamp)}
-            className={`cursor-pointer ${
-              highlightedText?.timestamp === line.timestamp ? 'bg-yellow-300' : ''
+            className={`p-3 rounded-lg cursor-pointer transition ${
+              highlightedText?.timestamp === line.timestamp
+                ? 'bg-yellow-200'
+                : 'hover:bg-gray-100'
             }`}
           >
-            [{line.timestamp}s]: {line.text}
+            <span className="font-semibold text-gray-600">
+              [{line.timestamp}s]:{' '}
+            </span>
+            <span className="text-gray-800">{line.text}</span>
           </li>
         ))}
       </ul>
