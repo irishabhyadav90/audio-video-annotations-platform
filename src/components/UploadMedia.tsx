@@ -37,10 +37,35 @@ const UploadMedia: React.FC<UploadMediaProps> = ({ onFileUploaded }) =>  {
 
 
   return (
-    <div>
-      <input type="file" onChange={handleFileChange} />
-      <button onClick={handleUpload}>Upload File</button>
-      {progress > 0 && <p>Upload Progress: {progress}%</p>}
+    <div className="flex flex-col items-center p-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg w-full shadow-lg">
+      <h2 className="text-2xl font-bold mb-2">Upload Your Media</h2>
+      <p className="text-sm mb-4">Choose a file to start uploading</p>
+      
+      <label className="bg-white text-indigo-600 font-bold py-2 px-4 rounded-full cursor-pointer shadow-md hover:bg-indigo-500 hover:text-white transition duration-200">
+        <input type="file" onChange={handleFileChange} className="hidden" />
+        {file ? file.name : 'Select File'}
+      </label>
+
+      <button
+        onClick={handleUpload}
+        className={`mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition duration-300 ease-in-out ${
+          !file ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
+        }`}
+        disabled={!file}
+      >
+        Upload File
+      </button>
+
+      {progress > 0 && (
+        <div className="w-full bg-gray-300 rounded-full mt-4">
+          <div
+            className="bg-green-500 text-xs font-medium text-green-100 text-center p-1 leading-none rounded-full"
+            style={{ width: `${progress}%` }}
+          >
+            {progress}% Uploaded
+          </div>
+        </div>
+      )}
     </div>
   );
 };

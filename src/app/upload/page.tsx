@@ -10,9 +10,8 @@ const UploadAndPlayPage = () => {
   const userRole: 'viewer' | 'editor' = 'editor';
 
   return (
-    <main className="flex items-center justify-center h-screen bg-gray-100">
-      <div className="p-8 bg-white shadow-lg rounded-lg">
-        <h1 className="text-2xl font-semibold mb-4">Upload Media</h1>
+    <main className="flex items-center justify-center h-screen w-full bg-gray-100 overflow-y-auto">
+      <div className='min-w-fit mx-auto h-full py-8'>
         {!fileUrl ? (
         <UploadMedia onFileUploaded={setFileUrl} />
       ) : (
