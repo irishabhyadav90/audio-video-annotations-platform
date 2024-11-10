@@ -1,6 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Annotation } from '@/types/annotations';
 import { useAnnotations } from '@/hooks/useAnnotations';
+import VideoPlayer from './VideoPlayer';
+import UserList from './UserList';
+import AnnotationList from './AnnotationsList';
+import Transcription from './Transcription';
 
 interface MediaPlayerProps {
     src: string;
@@ -20,8 +24,6 @@ const mockTranscription = [
 const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const [currentTime, setCurrentTime] = useState<number>(0);
-    // const [annotations, setAnnotations] = useState<Annotation[]>([]);
-    const [annotationText, setAnnotationText] = useState<string>('');
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [users, setUsers] = useState<{ id: string; status: string; currentTime: number }[]>([]);
     const wsRef = useRef<WebSocket | null>(null);
@@ -76,14 +78,13 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
         }
     };
 
-    const handleAddAnnotation = () => {
+    const handleAddAnnotation = (annotationText:string) => {
         if (role !== 'editor') return;
         if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
 
         const newAnnotation: Annotation = { timestamp: currentTime, text: annotationText };
         wsRef.current.send(JSON.stringify({ type: 'add', annotation: newAnnotation })); // Send annotation to WebSocket server
         addAnnotation({ timestamp: currentTime, text: annotationText });
-        setAnnotationText('');
     };
 
     const handleDeleteAnnotation = (timestamp: number) => {
@@ -95,18 +96,6 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
             wsRef.current.send(JSON.stringify({ type: 'delete', timestamp }));
         }
     };
-
-    // Filter transcription to show based on current playback time for karaoke-style highlighting
-    const highlightedText = mockTranscription.find(
-        (line) => Math.abs(line.timestamp - currentTime) < 2 // Highlight within 2-second range
-    );
-
-    // Handle search functionality to filter transcription based on keywords
-    const filteredTranscription = searchTerm
-        ? mockTranscription.filter((line) =>
-            line.text.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-        : mockTranscription;
 
     const handleJumpToTimestamp = (timestamp: number) => {
         if (videoRef.current) {
@@ -122,79 +111,28 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
     
     return (
         <div>
-            <video
-                ref={videoRef}
+            <VideoPlayer
+                ref={videoRef}  // Pass ref to VideoPlayer
                 src={src}
-                controls
                 onTimeUpdate={handleTimeUpdate}
                 onPlay={() => handleStatusChange('Viewing')}
                 onPause={() => handleStatusChange('Idle')}
-                className="w-full max-w-lg"
-                data-testid="video-player"
             />
-            <div>
-                <h3>Users</h3>
-                <ul>
-                    {users.map((user) => (
-                        <li key={user.id}>
-                            {user.id} - {user.status} at {user.currentTime.toFixed(2)}s
-                        </li>
-                    ))}
-                </ul>
-            </div>
-            <div>
-                {role === 'editor' && <div>
-                    <p>Current Time: {currentTime.toFixed(2)} seconds</p>
-                    <input
-                        type="text"
-                        value={annotationText}
-                        onChange={(e) => setAnnotationText(e.target.value)}
-                        placeholder="Add annotation"
-                        className="border p-2 mr-2"
-                    />
-                    <button onClick={handleAddAnnotation} className="bg-blue-500 text-white p-2">
-                        Add Annotation
-                    </button>
-                </div>}
-                <div>
-                    <h3>Annotations</h3>
-                    <ul>
-                        {annotations.map((annotation, index) => (
-                            <li key={index} data-testid="annotation-list">
-                                [{annotation.timestamp?.toFixed(2)}s]: {annotation.text}
-                                {role === 'editor' && (
-                                    <button onClick={() => handleDeleteAnnotation(annotation.timestamp)} className="ml-2 text-red-500">
-                                        Delete
-                                    </button>
-                                )}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                {/* Transcription with search and highlighting */}
-                <div className="mt-4">
-                    <h3>Transcription</h3>
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Search transcription"
-                        className="border p-2 mb-2"
-                    />
-                    <ul>
-                        {filteredTranscription.map((line, index) => (
-                            <li
-                                key={index}
-                                onClick={() => handleJumpToTimestamp(line.timestamp)}
-                                className={`cursor-pointer ${highlightedText?.timestamp === line.timestamp ? 'bg-yellow-300' : ''
-                                    }`}
-                            >
-                                [{line.timestamp}s]: {line.text}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
+           <UserList users={users} />
+             <AnnotationList
+                role={role}
+                annotations={annotations}
+                currentTime={currentTime}
+                onAddAnnotation={handleAddAnnotation}
+                onDeleteAnnotation={handleDeleteAnnotation}
+            />
+            <Transcription
+                transcription={mockTranscription}
+                currentTime={currentTime}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                onJumpToTimestamp={handleJumpToTimestamp}
+            />
         </div>
     );
 };
