@@ -30,7 +30,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
 
     const { annotations, addAnnotation, deleteAnnotation } = useAnnotations();
     
-    const port = process.env.NEXT_PUBLIC_WEBSOCKET_URL || '';
+    const port = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:3001';
     
     useEffect(() => {
         // Initialize WebSocket connection

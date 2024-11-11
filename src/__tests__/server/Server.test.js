@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { Server } from 'mock-socket';
@@ -5,7 +6,7 @@ import MediaPlayer from '@/components/MediaPlayer';
 import { AnnotationProvider } from '@/context/AnnotationContext';
 
 let mockServer;
-const port = process.env.NEXT_PUBLIC_WEBSOCKET_URL || '';
+const port = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:3001';
 
 beforeAll(() => {
   mockServer = new Server(port);
