@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react'
+import { render, screen, fireEvent } from '@testing-library/react';
 import MediaPlayer from '@/components/MediaPlayer';
 import { AnnotationProvider } from '@/context/AnnotationContext';
 
@@ -24,7 +25,7 @@ describe('MediaPlayer Component', () => {
       </AnnotationProvider>
     );
 
-    const videoElement = screen.getByTestId('video-player') as HTMLVideoElement;
+    const videoElement = screen.getByTestId('video-player');
 
     Object.defineProperty(videoElement, 'currentTime', { value: 10, writable: true });
     fireEvent.timeUpdate(videoElement);
