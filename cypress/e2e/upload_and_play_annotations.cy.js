@@ -17,7 +17,7 @@ describe('End-to-End Flow: Upload, Play, and Annotate', () => {
   
       // Step 6: Add an annotation
       cy.get('input[placeholder="Add annotation"]').type('Test annotation');
-      cy.get('button').contains('Add Annotation').click();
+      cy.get('button').contains('Add').click();
   
       // Step 7: Verify the annotation appears in the annotations list
       cy.contains('[0.00s]: Test annotation').should('be.visible');
@@ -25,8 +25,10 @@ describe('End-to-End Flow: Upload, Play, and Annotate', () => {
       // Step 8: Delete the annotation to complete the flow
       cy.contains('[0.00s]: Test annotation')
         .parent()
+        .parent()
         .find('button')
-        .contains('Delete')
+        .should('contain.text', 'Delete')
+        .and('be.visible') // Check that it's visible
         .click();
   
       // Step 9: Verify annotation was deleted

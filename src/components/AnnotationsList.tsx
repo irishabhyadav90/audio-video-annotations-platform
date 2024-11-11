@@ -35,7 +35,7 @@ const AnnotationList: React.FC<AnnotationListProps> = ({
               type="text"
               value={annotationText}
               onChange={(e) => setAnnotationText(e.target.value)}
-              placeholder="Add annotation..."
+              placeholder="Add annotation"
               className="flex-grow border border-gray-300 rounded-lg p-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
             />
             <button
