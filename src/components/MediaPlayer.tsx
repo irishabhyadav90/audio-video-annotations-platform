@@ -29,10 +29,12 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
     const wsRef = useRef<WebSocket | null>(null);
 
     const { annotations, addAnnotation, deleteAnnotation } = useAnnotations();
-
+    
+    const port = process.env.NEXT_PUBLIC_WEBSOCKET_URL || '';
+    
     useEffect(() => {
         // Initialize WebSocket connection
-        wsRef.current = new WebSocket('ws://localhost:3001');
+        wsRef.current = new WebSocket(port);
 
         wsRef.current.onopen = () => {
             console.log('Connected to WebSocket server');
