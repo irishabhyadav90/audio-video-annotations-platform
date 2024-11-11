@@ -5,9 +5,10 @@ import MediaPlayer from '@/components/MediaPlayer';
 import { AnnotationProvider } from '@/context/AnnotationContext';
 
 let mockServer;
+const port = process.env.NEXT_PUBLIC_WEBSOCKET_URL || '';
 
 beforeAll(() => {
-  mockServer = new Server('ws://localhost:3001');
+  mockServer = new Server(port);
 });
 
 afterAll(() => {
