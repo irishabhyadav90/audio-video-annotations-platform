@@ -84,7 +84,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({ src, role }) => {
 
         const newAnnotation: Annotation = { timestamp: currentTime, text: annotationText };
         wsRef.current.send(JSON.stringify({ type: 'add', annotation: newAnnotation })); // Send annotation to WebSocket server
-        addAnnotation({ timestamp: currentTime, text: annotationText });
+        // addAnnotation({ timestamp: currentTime, text: annotationText });
     };
 
     const handleDeleteAnnotation = (timestamp: number) => {

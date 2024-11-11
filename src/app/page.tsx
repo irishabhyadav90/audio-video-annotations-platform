@@ -1,12 +1,9 @@
-import { AnnotationProvider } from '@/context/AnnotationContext';
-import UploadPage from './upload/page';
-
 const HomePage = () => {
   return (
     <main>
-      <AnnotationProvider>
-       <UploadPage/>
-      </AnnotationProvider>
+      <div>
+        First page on which user lands
+      </div>
     </main>
   );
 };

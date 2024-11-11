@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, lazy, Suspense } from 'react';
 import UploadMedia from '@/components/UploadMedia';
+import { AnnotationProvider } from '@/context/AnnotationContext';
 
 
 const MediaPlayer = lazy(() => import('@/components/MediaPlayer'));
@@ -10,7 +11,8 @@ const UploadAndPlayPage = () => {
   const userRole: 'viewer' | 'editor' = 'editor';
 
   return (
-    <main className="flex items-center justify-center h-screen w-full bg-gray-100 overflow-y-auto">
+    <AnnotationProvider>
+     <div className="flex items-center justify-center h-screen w-full bg-gray-100 overflow-y-auto">
       <div className='min-w-fit mx-auto h-full py-8'>
         {!fileUrl ? (
         <UploadMedia onFileUploaded={setFileUrl} />
@@ -20,7 +22,8 @@ const UploadAndPlayPage = () => {
         </Suspense>
       )}
       </div>
-    </main>
+     </div>
+    </AnnotationProvider>
   );
 };
 
